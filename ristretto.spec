@@ -54,8 +54,8 @@ rm -rf $RPM_BUILD_ROOT
 	DESTDIR=$RPM_BUILD_ROOT
 
 mv -f $RPM_BUILD_ROOT%{_datadir}/locale/{nb_NO,nb}
-# seems to be unsupported
-rm -rf $RPM_BUILD_ROOT%{_datadir}/locale/pk
+# Urdu is ur, not pk
+mv -f $RPM_BUILD_ROOT%{_datadir}/locale/{pk,ur}
 
 %find_lang %{name}
 
