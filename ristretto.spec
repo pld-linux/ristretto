@@ -1,36 +1,43 @@
 Summary:	Picture-viewer for the Xfce desktop environment
-Summary(pl):	Przegl±darka obrazów dla ¶rodowiska Xfce
+Summary(pl.UTF-8):	PrzeglÄ…darka obrazÃ³w dla Å›rodowiska Xfce
 Name:		ristretto
-Version:	0.0.9
-Release:	0.1
+Version:	0.0.10
+Release:	1
 License:	GPL v2
 Group:		X11/Applications/Graphics
 Source0:	http://goodies.xfce.org/releases/ristretto/%{name}-%{version}.tar.gz
-# Source0-md5:	67c7b6b33b4227a33bbbc787b15dafb2
-URL:		http://goodies.xfce.org/projects/applications/ristretto
-BuildRequires:	Thunar-devel >= 0.4
-BuildRequires:	autoconf
+# Source0-md5:	0f9e258c75030050e1144df381b2de8e
+URL:		http://goodies.xfce.org/projects/applications/ristretto/
+BuildRequires:	Thunar-devel >= 0.4.0
+BuildRequires:	autoconf >= 2.50
 BuildRequires:	automake
-BuildRequires:	glib2-devel >= 2.12
+BuildRequires:	dbus-glib-devel >= 0.34
+BuildRequires:	glib2-devel >= 1:2.12.0
 BuildRequires:	gtk+2-devel >= 2:2.10.0
-BuildRequires:	libexif-devel >= 0.6
-BuildRequires:	libtool
+BuildRequires:	intltool >= 0.31
+BuildRequires:	libexif-devel >= 0.6.0
+BuildRequires:	libxfce4util-devel >= 4.4.0
+BuildRequires:	libxfcegui4-devel >= 4.4.0
 BuildRequires:	pkgconfig
+BuildRequires:	rpmbuild(macros) >= 1.311
+BuildRequires:	xfce4-dev-tools >= 4.4.0
+Requires(post,postun):	desktop-file-utils
+Requires(post,postun):	gtk+2
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
 Ristretto is a fast and lightweight picture-viewer for the Xfce
 desktop environment.
 
-%description -l pl
-Ristretto jest szybk± i lekk± przegladark± obrazów dla ¶rodowiska
+%description -l pl.UTF-8
+Ristretto jest szybkÄ… i lekkÄ… przeglÄ…darkÄ… obrazÃ³w dla Å›rodowiska
 Xfce.
 
 %prep
 %setup -q
 
 %build
-%{__libtoolize}
+%{__intltoolize}
 %{__aclocal}
 %{__autoconf}
 %{__autoheader}
@@ -47,6 +54,9 @@ rm -rf $RPM_BUILD_ROOT
 	DESTDIR=$RPM_BUILD_ROOT
 
 mv -f $RPM_BUILD_ROOT%{_datadir}/locale/{nb_NO,nb}
+# seems to be unsupported
+rm -rf $RPM_BUILD_ROOT%{_datadir}/locale/pk
+
 %find_lang %{name}
 
 %clean
