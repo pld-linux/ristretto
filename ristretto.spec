@@ -1,12 +1,12 @@
 Summary:	Picture-viewer for the Xfce desktop environment
 Summary(pl.UTF-8):	Przeglądarka obrazów dla środowiska Xfce
 Name:		ristretto
-Version:	0.0.10
+Version:	0.0.14
 Release:	1
 License:	GPL v2
 Group:		X11/Applications/Graphics
 Source0:	http://goodies.xfce.org/releases/ristretto/%{name}-%{version}.tar.gz
-# Source0-md5:	0f9e258c75030050e1144df381b2de8e
+# Source0-md5:	8b3a4b74d9408455164bd752cb1dd14a
 URL:		http://goodies.xfce.org/projects/applications/ristretto/
 BuildRequires:	Thunar-devel >= 0.4.0
 BuildRequires:	autoconf >= 2.50
@@ -23,6 +23,7 @@ BuildRequires:	rpmbuild(macros) >= 1.311
 BuildRequires:	xfce4-dev-tools >= 4.4.0
 Requires(post,postun):	desktop-file-utils
 Requires(post,postun):	gtk+2
+Requires(post,postun):	hicolor-icon-theme
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -54,8 +55,6 @@ rm -rf $RPM_BUILD_ROOT
 	DESTDIR=$RPM_BUILD_ROOT
 
 mv -f $RPM_BUILD_ROOT%{_datadir}/locale/{nb_NO,nb}
-# Urdu is ur, not pk
-mv -f $RPM_BUILD_ROOT%{_datadir}/locale/{pk,ur}
 
 %find_lang %{name}
 
