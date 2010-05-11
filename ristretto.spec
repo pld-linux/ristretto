@@ -2,11 +2,12 @@ Summary:	Picture-viewer for the Xfce desktop environment
 Summary(pl.UTF-8):	Przeglądarka obrazów dla środowiska Xfce
 Name:		ristretto
 Version:	0.0.21
-Release:	1
+Release:	2
 License:	GPL v2
 Group:		X11/Applications/Graphics
 Source0:	http://goodies.xfce.org/releases/ristretto/%{name}-%{version}.tar.gz
 # Source0-md5:	7774dcafdc365e70b8d981c0a52d6250
+Patch0:		%{name}-desktop.patch
 URL:		http://goodies.xfce.org/projects/applications/ristretto/
 BuildRequires:	Thunar-devel >= 0.4.0
 BuildRequires:	autoconf >= 2.50
@@ -37,6 +38,7 @@ Xfce.
 
 %prep
 %setup -q
+%patch0 -p1
 
 %build
 %{__intltoolize}
