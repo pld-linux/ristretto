@@ -14,9 +14,10 @@ BuildRequires:	dbus-glib-devel >= 0.34
 BuildRequires:	gettext-devel
 BuildRequires:	glib2-devel >= 1:2.12.0
 BuildRequires:	gtk+2-devel >= 2:2.10.0
+BuildRequires:	intltool >= 0.31
 BuildRequires:	libexif-devel >= 0.6.0
-BuildRequires:	libxfce4ui-devel >= 4.7.0
 BuildRequires:	libxfce4util-devel >= 4.7.0
+BuildRequires:	libxfcegui4-devel >= 4.7.0
 BuildRequires:	pkgconfig
 BuildRequires:	rpmbuild(macros) >= 1.311
 BuildRequires:	xfce4-dev-tools >= 4.7.0
@@ -38,13 +39,8 @@ Xfce.
 %patch0 -p1
 
 %build
-%{__intltoolize}
-%{__aclocal}
-%{__autoconf}
-%{__autoheader}
-%{__automake}
-%configure \
-	--disable-static
+%configure
+
 %{__make}
 
 %install
@@ -53,8 +49,7 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-mv -f $RPM_BUILD_ROOT%{_datadir}/locale/{nb_NO,nb}
-mv -f $RPM_BUILD_ROOT%{_datadir}/locale/{pt_PT,pt}
+rm -r $RPM_BUILD_ROOT%{_datadir}/locale/ur_PK
 
 %find_lang %{name}
 
