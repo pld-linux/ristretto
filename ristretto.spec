@@ -1,28 +1,25 @@
 Summary:	Picture-viewer for the Xfce desktop environment
 Summary(pl.UTF-8):	Przeglądarka obrazów dla środowiska Xfce
 Name:		ristretto
-Version:	0.0.21
-Release:	2
+Version:	0.0.91
+Release:	0.1
 License:	GPL v2
 Group:		X11/Applications/Graphics
-Source0:	http://goodies.xfce.org/releases/ristretto/%{name}-%{version}.tar.gz
-# Source0-md5:	7774dcafdc365e70b8d981c0a52d6250
+Source0:	http://archive.xfce.org/src/apps/ristretto/0.0/%{name}-%{version}.tar.bz2
+# Source0-md5:	1df541b920f044ac9f3731b2a0fe02d1
 Patch0:		%{name}-desktop.patch
 URL:		http://goodies.xfce.org/projects/applications/ristretto/
-BuildRequires:	Thunar-devel >= 0.4.0
-BuildRequires:	autoconf >= 2.50
-BuildRequires:	automake
+BuildRequires:	Thunar-devel >= 1.1.0
 BuildRequires:	dbus-glib-devel >= 0.34
 BuildRequires:	gettext-devel
 BuildRequires:	glib2-devel >= 1:2.12.0
 BuildRequires:	gtk+2-devel >= 2:2.10.0
-BuildRequires:	intltool >= 0.31
 BuildRequires:	libexif-devel >= 0.6.0
-BuildRequires:	libxfce4util-devel >= 4.4.0
-BuildRequires:	libxfcegui4-devel >= 4.4.0
+BuildRequires:	libxfce4ui-devel >= 4.7.0
+BuildRequires:	libxfce4util-devel >= 4.7.0
 BuildRequires:	pkgconfig
 BuildRequires:	rpmbuild(macros) >= 1.311
-BuildRequires:	xfce4-dev-tools >= 4.4.0
+BuildRequires:	xfce4-dev-tools >= 4.7.0
 Requires(post,postun):	desktop-file-utils
 Requires(post,postun):	gtk+2
 Requires(post,postun):	hicolor-icon-theme
