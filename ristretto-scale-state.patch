@@ -1,0 +1,346 @@
+commit 048812613c8e8a77d1afb9b9cceb9fc8ed864572
+Author: Stephan Arts <stephan@xfce.org>
+Date:   Wed Sep 22 04:40:34 2010 +0200
+
+    - Fix saving of scale-state on images
+    - Set 'local_only' property to false on filechooser
+
+diff --git a/src/image.c b/src/image.c
+index f0344cc..2e45a98 100644
+--- a/src/image.c
++++ b/src/image.c
+@@ -34,6 +34,8 @@
+ #define RSTTO_IMAGE_BUFFER_SIZE 131072
+ #endif
+ 
++#define STD_IMAGE_SIZE 1024
++
+ enum
+ {
+     RSTTO_IMAGE_SIGNAL_UPDATED= 0,
+@@ -114,7 +116,7 @@ struct _RsttoImagePriv
+     GdkPixbuf *pixbuf;
+     gint       width;
+     gint       height;
+-    guint      max_size;
++    gdouble    scale;
+ 
+     /* Animation data for animated images (like .gif/.mng) */
+     /*******************************************************/
+@@ -310,8 +312,9 @@ rstto_image_new (GFile *file)
+  * Return value: TRUE on success.
+  */
+ gboolean
+-rstto_image_load (RsttoImage *image, gboolean empty_cache, guint max_size, gboolean preload, GError **error)
++rstto_image_load (RsttoImage *image, gboolean empty_cache, gdouble scale, gboolean preload, GError **error)
+ {
++    g_debug("%s: %f", __FUNCTION__, scale);
+     RsttoImageCache *cache;
+ 
+     g_return_val_if_fail (image != NULL, FALSE);
+@@ -320,8 +323,8 @@ rstto_image_load (RsttoImage *image, gboolean empty_cache, guint max_size, gbool
+ 
+     g_cancellable_reset (image->priv->cancellable);
+ 
+-    /* NEW */
+-    image->priv->max_size = max_size;
++    /* Image scale */
++    image->priv->scale = scale;
+ 
+     /* Check if a GIOChannel is present, if so... the load is already in progress */
+     /* The image needs to be loaded if:
+@@ -680,11 +682,27 @@ cb_rstto_image_size_prepared (GdkPixbufLoader *loader, gint width, gint height,
+     image->priv->width = width;
+     image->priv->height = height;
+ 
+-    if (image->priv->max_size > 0)
++    if (image->priv->scale > 0.0)
++    {
++    	gdk_pixbuf_loader_set_size (loader, (gint)((gdouble)width*image->priv->scale), (gint)((gdouble)height*image->priv->scale));
++    }
++    else
+     {
+-        gdouble ratio = (gdouble)(image->priv->max_size)/(gdouble)(width * height);
+-        if (ratio < 1)
+-    	    gdk_pixbuf_loader_set_size (loader, width*ratio, height*ratio);
++        if (width > height)
++        {
++            if (width > STD_IMAGE_SIZE)
++            {
++    	        gdk_pixbuf_loader_set_size (loader, STD_IMAGE_SIZE, (height*STD_IMAGE_SIZE)/width);
++            }
++        }
++        else
++        {
++            if (height > STD_IMAGE_SIZE)
++            {
++    	        gdk_pixbuf_loader_set_size (loader, (width*STD_IMAGE_SIZE)/height, STD_IMAGE_SIZE);
++            }
++
++        }
+     }
+ 
+     g_signal_emit(G_OBJECT(image), rstto_image_signals[RSTTO_IMAGE_SIGNAL_PREPARED], 0, image, NULL);
+diff --git a/src/image.h b/src/image.h
+index 1e17346..a36659b 100644
+--- a/src/image.h
++++ b/src/image.h
+@@ -81,7 +81,7 @@ gint rstto_image_get_height (RsttoImage *image);
+ 
+ GFile *rstto_image_get_file (RsttoImage *image);
+ void rstto_image_unload (RsttoImage *image);
+-gboolean rstto_image_load (RsttoImage *image, gboolean empty_cache, guint max_size, gboolean preload, GError **error);
++gboolean rstto_image_load (RsttoImage *image, gboolean empty_cache, gdouble scale, gboolean preload, GError **error);
+ 
+ guint64 rstto_image_get_size (RsttoImage *image);
+ 
+diff --git a/src/main.c b/src/main.c
+index cc51e6c..a69c683 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -84,6 +84,9 @@ main(int argc, char **argv)
+     textdomain (GETTEXT_PACKAGE);
+     #endif
+ 
++    g_thread_init(NULL);
++    gdk_threads_init();
++
+     if(!gtk_init_with_args(&argc, &argv, "", entries, PACKAGE, &cli_error))
+     {
+         if (cli_error != NULL)
+@@ -126,7 +129,9 @@ main(int argc, char **argv)
+     g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(gtk_main_quit), NULL);
+     gtk_widget_show_all (window);
+ 
++    GDK_THREADS_ENTER();
+     gtk_main();
++    GDK_THREADS_LEAVE();
+ 
+     g_object_unref (settings);
+ 
+diff --git a/src/main_window.c b/src/main_window.c
+index a96e94f..747496f 100644
+--- a/src/main_window.c
++++ b/src/main_window.c
+@@ -1680,10 +1680,10 @@ cb_rstto_main_window_image_list_new_image (RsttoImageList *image_list, RsttoImag
+     else
+     {
+         rstto_image_list_iter_find_image (window->priv->iter, image);
++        rstto_main_window_image_list_iter_changed (window);
+     }
+     window->priv->open_image_timer_id = g_timeout_add (
+             1000, rstto_window_open_image_timer, window);
+-    rstto_main_window_image_list_iter_changed (window);
+ }
+ 
+ static gboolean
+@@ -1946,6 +1946,8 @@ cb_rstto_main_window_open_image (GtkWidget *widget, RsttoMainWindow *window)
+                                          NULL);
+ 
+     gtk_file_chooser_set_select_multiple (GTK_FILE_CHOOSER (dialog), TRUE);
++    gtk_file_chooser_set_local_only (GTK_FILE_CHOOSER (dialog), FALSE);
++
+     if (g_value_get_string (&current_uri_val))
+         gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (dialog), g_value_get_string (&current_uri_val));
+ 
+@@ -1957,6 +1959,7 @@ cb_rstto_main_window_open_image (GtkWidget *widget, RsttoMainWindow *window)
+     gtk_file_filter_add_mime_type (filter, "image/jpeg");
+     gtk_file_filter_set_name (filter, _(".jp(e)g"));
+     gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog), filter);
++    gtk_file_chooser_set_local_only (GTK_FILE_CHOOSER(dialog), FALSE);
+ 
+ 
+     response = gtk_dialog_run(GTK_DIALOG(dialog));
+diff --git a/src/picture_viewer.c b/src/picture_viewer.c
+index 5c23703..b171a39 100644
+--- a/src/picture_viewer.c
++++ b/src/picture_viewer.c
+@@ -771,6 +771,9 @@ rstto_picture_viewer_set_scale (RsttoPictureViewer *viewer, gdouble scale)
+              * since the old and new values are required in the above code
+              */
+             *img_scale = scale;
++            g_object_set_data (G_OBJECT (viewer->priv->image), "viewer-scale", img_scale);
++
++            rstto_image_load (viewer->priv->image, TRUE, scale, FALSE, NULL);
+ 
+             rstto_picture_viewer_queued_repaint (viewer, TRUE);
+         }
+@@ -896,6 +899,8 @@ cb_rstto_picture_viewer_scroll_event (RsttoPictureViewer *viewer, GdkEventScroll
+ 
+                     break;
+             }
++
++            rstto_picture_viewer_set_scale (viewer, *p_scale);
+             gtk_adjustment_value_changed(viewer->hadjustment);
+             gtk_adjustment_value_changed(viewer->vadjustment);
+             viewer->priv->repaint.idle_id = g_idle_add((GSourceFunc)cb_rstto_picture_viewer_queued_repaint, viewer);
+@@ -1479,6 +1484,7 @@ cb_rstto_picture_viewer_button_release_event (RsttoPictureViewer *viewer, GdkEve
+                             }
+ 
+                             g_object_set_data (G_OBJECT(viewer->priv->image), "viewer-scale", scale);
++                            rstto_picture_viewer_set_scale(viewer, *scale);
+ 
+                             if(viewer->hadjustment)
+                             {
+@@ -1594,8 +1600,7 @@ rstto_picture_viewer_set_zoom_mode(RsttoPictureViewer *viewer, RsttoZoomMode mod
+                 g_object_set_data (G_OBJECT (viewer->priv->image), "viewer-fit-to-screen", p_fit_to_screen);
+             }
+             scale = rstto_picture_viewer_calculate_scale (viewer);
+-            if (scale != -1.0)
+-                rstto_picture_viewer_set_scale (viewer, scale);
++            rstto_picture_viewer_set_scale (viewer, scale);
+             break;
+         case RSTTO_ZOOM_MODE_100:
+             if (viewer->priv->image)
+@@ -1658,7 +1663,7 @@ rstto_picture_viewer_set_image (RsttoPictureViewer *viewer, RsttoImage *image)
+             g_object_set_data (G_OBJECT (viewer->priv->image), "viewer-fit-to-screen", fit_to_screen);
+         }
+ 
+-        rstto_image_load (viewer->priv->image, FALSE, g_value_get_uint (&max_size), FALSE, NULL);
++        rstto_image_load (viewer->priv->image, FALSE, *scale, FALSE, NULL);
+     }
+     else
+     {
+diff --git a/src/preferences_dialog.c b/src/preferences_dialog.c
+index d18c6f6..8455e20 100644
+--- a/src/preferences_dialog.c
++++ b/src/preferences_dialog.c
+@@ -50,8 +50,6 @@ cb_rstto_preferences_dialog_cache_preload_check_button_toggled (GtkToggleButton
+ static void
+ cb_rstto_preferences_dialog_cache_spin_button_value_changed (GtkSpinButton *, gpointer);
+ static void
+-cb_rstto_preferences_dialog_image_quality_combo_box_changed (GtkComboBox *, gpointer);
+-static void
+ cb_rstto_preferences_dialog_image_preview_toggled (GtkToggleButton *button, 
+                                                       gpointer user_data);
+ static void
+@@ -90,12 +88,6 @@ struct _RsttoPreferencesDialogPriv
+         GtkWidget *bgcolor_color_button;
+         GtkWidget *bgcolor_override_check_button;
+ 
+-
+-        GtkWidget *image_quality_frame;
+-        GtkWidget *image_quality_vbox;
+-        GtkWidget *image_quality_hbox;
+-        GtkWidget *image_quality_label;
+-        GtkWidget *image_quality_combo;
+         GtkWidget *image_preview_check_button;
+     } display_tab;
+ 
+@@ -176,7 +168,6 @@ rstto_preferences_dialog_get_type (void)
+ static void
+ rstto_preferences_dialog_init(RsttoPreferencesDialog *dialog)
+ {
+-    guint uint_image_quality;
+     guint uint_cache_size;
+     gboolean bool_preload_images;
+     gboolean bool_enable_cache;
+@@ -208,7 +199,6 @@ rstto_preferences_dialog_init(RsttoPreferencesDialog *dialog)
+ 
+     dialog->priv->settings = rstto_settings_new ();
+     g_object_get (G_OBJECT (dialog->priv->settings),
+-                  "image-quality", &uint_image_quality,
+                   "cache-size", &uint_cache_size,
+                   "show-preview", &bool_show_preview,
+                   "preload-images", &bool_preload_images,
+@@ -261,15 +251,6 @@ rstto_preferences_dialog_init(RsttoPreferencesDialog *dialog)
+     g_signal_connect (G_OBJECT (dialog->priv->display_tab.bgcolor_color_button), 
+                       "color-set", G_CALLBACK (cb_rstto_preferences_dialog_bgcolor_color_set), dialog);
+ 
+-/** Image-quality frame */
+-    dialog->priv->display_tab.image_quality_vbox = gtk_vbox_new(FALSE, 0);
+-    dialog->priv->display_tab.image_quality_frame = xfce_create_framebox_with_content (_("Quality"),
+-                                                                                 dialog->priv->display_tab.image_quality_vbox);
+-    gtk_box_pack_start (GTK_BOX (display_main_vbox), dialog->priv->display_tab.image_quality_frame, FALSE, FALSE, 0);
+-
+-    dialog->priv->display_tab.image_quality_label = gtk_label_new (_("Maximum render quality:"));
+-    dialog->priv->display_tab.image_quality_hbox= gtk_hbox_new (FALSE, 4);
+-    dialog->priv->display_tab.image_quality_combo= gtk_combo_box_new_text ();
+     dialog->priv->display_tab.image_preview_check_button = gtk_check_button_new_with_label (_("Show preview when loading image"));
+ 
+     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (dialog->priv->display_tab.image_preview_check_button),
+@@ -277,45 +258,6 @@ rstto_preferences_dialog_init(RsttoPreferencesDialog *dialog)
+     g_signal_connect (G_OBJECT (dialog->priv->display_tab.image_preview_check_button), 
+                       "toggled", (GCallback)cb_rstto_preferences_dialog_image_preview_toggled, dialog);
+ 
+-    gtk_combo_box_append_text (GTK_COMBO_BOX (dialog->priv->display_tab.image_quality_combo), _("Best"));
+-    gtk_combo_box_append_text (GTK_COMBO_BOX (dialog->priv->display_tab.image_quality_combo), _("High"));
+-    gtk_combo_box_append_text (GTK_COMBO_BOX (dialog->priv->display_tab.image_quality_combo), _("Medium"));
+-    gtk_combo_box_append_text (GTK_COMBO_BOX (dialog->priv->display_tab.image_quality_combo), _("Low"));
+-
+-    gtk_box_pack_start (GTK_BOX (dialog->priv->display_tab.image_quality_vbox), 
+-                                 dialog->priv->display_tab.image_quality_hbox, FALSE, FALSE, 0);
+-    gtk_box_pack_start (GTK_BOX (dialog->priv->display_tab.image_quality_vbox), 
+-                                 dialog->priv->display_tab.image_preview_check_button, FALSE, FALSE, 0);
+-
+-    gtk_box_pack_start (GTK_BOX (dialog->priv->display_tab.image_quality_hbox), 
+-                                 dialog->priv->display_tab.image_quality_label, FALSE, FALSE, 0);
+-    gtk_box_pack_start (GTK_BOX (dialog->priv->display_tab.image_quality_hbox), 
+-                                 dialog->priv->display_tab.image_quality_combo, FALSE, FALSE, 0);
+-    /* set current value */
+-    switch (uint_image_quality-(uint_image_quality%1000000))
+-    {
+-        case 0:
+-            gtk_combo_box_set_active (GTK_COMBO_BOX (dialog->priv->display_tab.image_quality_combo), 0);
+-            break;
+-        case 8000000:
+-            gtk_combo_box_set_active (GTK_COMBO_BOX (dialog->priv->display_tab.image_quality_combo), 1);
+-            break;
+-        case 4000000:
+-            gtk_combo_box_set_active (GTK_COMBO_BOX (dialog->priv->display_tab.image_quality_combo), 2);
+-            break;
+-        case 2000000:
+-            gtk_combo_box_set_active (GTK_COMBO_BOX (dialog->priv->display_tab.image_quality_combo), 3);
+-            break;
+-        default:
+-            gtk_combo_box_set_active (GTK_COMBO_BOX (dialog->priv->display_tab.image_quality_combo), 2);
+-            break;
+-    }
+-
+-    /* connect signals */
+-    g_signal_connect (G_OBJECT (dialog->priv->display_tab.image_quality_combo), 
+-                      "changed", (GCallback)cb_rstto_preferences_dialog_image_quality_combo_box_changed, dialog);
+-    
+-
+ /*******************/
+ /** Slideshow tab **/
+ /*******************/
+@@ -642,38 +584,6 @@ cb_rstto_preferences_dialog_cache_spin_button_value_changed (GtkSpinButton *butt
+ }
+ 
+ static void
+-cb_rstto_preferences_dialog_image_quality_combo_box_changed (GtkComboBox *combo_box,
+-                                                             gpointer user_data)
+-
+-{
+-    /* FIXME */
+-    RsttoPreferencesDialog *dialog = RSTTO_PREFERENCES_DIALOG (user_data);
+-    switch (gtk_combo_box_get_active (combo_box))
+-    {
+-        case 0: /* unlimited */
+-            g_object_set (G_OBJECT (dialog->priv->settings),
+-                          "image-quality", 0,
+-                          NULL);
+-            break;
+-        case 1: /* 1 MegaPixel */
+-            g_object_set (G_OBJECT (dialog->priv->settings),
+-                          "image-quality", 8000000,
+-                          NULL);
+-            break;
+-        case 2: /* 2 MegaPixel */
+-            g_object_set (G_OBJECT (dialog->priv->settings),
+-                          "image-quality", 4000000,
+-                          NULL);
+-            break;
+-        case 3: /* 4 MegaPixel */
+-            g_object_set (G_OBJECT (dialog->priv->settings),
+-                          "image-quality", 2000000,
+-                          NULL);
+-            break;
+-    }
+-}
+-
+-static void
+ cb_rstto_preferences_dialog_image_preview_toggled (GtkToggleButton *button, 
+                                                       gpointer user_data)
+ {

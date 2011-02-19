@@ -1,0 +1,19 @@
+commit 565519daa73bc7a737739b3ea618d076b159c7be
+Author: Stephan Arts <stephan@xfce.org>
+Date:   Mon Nov 15 20:07:29 2010 +0100
+
+    Remove debug output
+
+diff --git a/src/image.c b/src/image.c
+index 2e45a98..9b3c2ce 100644
+--- a/src/image.c
++++ b/src/image.c
+@@ -314,7 +314,7 @@ rstto_image_new (GFile *file)
+ gboolean
+ rstto_image_load (RsttoImage *image, gboolean empty_cache, gdouble scale, gboolean preload, GError **error)
+ {
+-    g_debug("%s: %f", __FUNCTION__, scale);
++    /* g_debug("%s: %f", __FUNCTION__, scale); */
+     RsttoImageCache *cache;
+ 
+     g_return_val_if_fail (image != NULL, FALSE);
