@@ -75,8 +75,5 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %doc AUTHORS ChangeLog NEWS README
 %attr(755,root,root) %{_bindir}/%{name}
-%dir %{_docdir}/ristretto
-%dir %{_docdir}/ristretto/html
-%{_docdir}/ristretto/html/C
 %{_desktopdir}/%{name}.desktop
 %{_iconsdir}/hicolor/*/*/*
