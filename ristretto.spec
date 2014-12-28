@@ -13,7 +13,7 @@ BuildRequires:	Thunar-devel >= 1.2.0
 BuildRequires:	autoconf >= 2.50
 BuildRequires:	automake
 BuildRequires:	dbus-glib-devel >= 0.34
-BuildRequires:	gettext-devel
+BuildRequires:	gettext-tools
 BuildRequires:	glib2-devel >= 1:2.12.0
 BuildRequires:	gtk+2-devel >= 2:2.10.0
 BuildRequires:	intltool >= 0.31
