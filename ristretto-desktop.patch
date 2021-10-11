@@ -1,5 +1,5 @@
---- ristretto-0.11.0/ristretto.desktop.in~	2020-12-18 10:32:29.000000000 +0000
-+++ ristretto-0.11.0/ristretto.desktop.in	2021-06-11 11:47:14.189782667 +0000
+--- ristretto-0.11.0/org.xfce.ristretto.desktop.in~	2020-12-18 10:32:29.000000000 +0000
++++ ristretto-0.11.0/org.xfce.ristretto.desktop.in	2021-06-11 11:47:14.189782667 +0000
 @@ -8,6 +8,6 @@
  Terminal=false
  Type=Application
