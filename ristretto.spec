@@ -5,7 +5,7 @@ Version:	0.12.2
 Release:	1
 License:	GPL v2
 Group:		X11/Applications/Graphics
-Source0:	http://archive.xfce.org/src/apps/ristretto/0.12/%{name}-%{version}.tar.bz2
+Source0:	https://archive.xfce.org/src/apps/ristretto/0.12/%{name}-%{version}.tar.bz2
 # Source0-md5:	f42056310bfbc16d2657b502aa27719c
 Patch0:		%{name}-desktop.patch
 URL:		http://goodies.xfce.org/projects/applications/ristretto/
