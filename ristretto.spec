@@ -1,29 +1,29 @@
 Summary:	Picture-viewer for the Xfce desktop environment
 Summary(pl.UTF-8):	Przeglądarka obrazów dla środowiska Xfce
 Name:		ristretto
-Version:	0.13.0
+Version:	0.13.1
 Release:	1
 License:	GPL v2
 Group:		X11/Applications/Graphics
 Source0:	https://archive.xfce.org/src/apps/ristretto/0.13/%{name}-%{version}.tar.bz2
-# Source0-md5:	2f3a641fb4b9620a43575c932eb20dcd
+# Source0-md5:	a21966fa7aa2de1881f163097b62a2fd
 Patch0:		%{name}-desktop.patch
 URL:		https://goodies.xfce.org/projects/applications/ristretto/
 BuildRequires:	autoconf >= 2.50
 BuildRequires:	automake
-BuildRequires:	cairo-devel >= 1.8.0
+BuildRequires:	cairo-devel >= 1.10.0
 BuildRequires:	dbus-glib-devel >= 0.34
 BuildRequires:	gettext-tools
 BuildRequires:	glib2-devel >= 1:2.56.0
 BuildRequires:	gtk+3-devel >= 3.22.0
 BuildRequires:	intltool >= 0.31
 BuildRequires:	libexif-devel >= 0.6.0
-BuildRequires:	libxfce4ui-devel >= 4.14.0
-BuildRequires:	libxfce4util-devel >= 4.14.0
+BuildRequires:	libxfce4ui-devel >= 4.16.0
+BuildRequires:	libxfce4util-devel >= 4.16.0
 BuildRequires:	pkgconfig
 BuildRequires:	rpmbuild(macros) >= 2.000
-BuildRequires:	xfce4-dev-tools >= 4.14.0
-BuildRequires:	xfconf-devel >= 4.14.0
+BuildRequires:	xfce4-dev-tools >= 4.16.0
+BuildRequires:	xfconf-devel >= 4.16.0
 Requires(post,postun):	desktop-file-utils
 Requires:	gtk-update-icon-cache
 Requires:	hicolor-icon-theme
@@ -42,7 +42,7 @@ Xfce.
 %patch0 -p1
 
 %build
-%{__intltoolize}
+#%{__intltoolize}
 %{__aclocal}
 %{__autoconf}
 %{__autoheader}
