@@ -1,12 +1,12 @@
 Summary:	Picture-viewer for the Xfce desktop environment
 Summary(pl.UTF-8):	Przeglądarka obrazów dla środowiska Xfce
 Name:		ristretto
-Version:	0.13.1
+Version:	0.13.2
 Release:	1
 License:	GPL v2
 Group:		X11/Applications/Graphics
 Source0:	https://archive.xfce.org/src/apps/ristretto/0.13/%{name}-%{version}.tar.bz2
-# Source0-md5:	a21966fa7aa2de1881f163097b62a2fd
+# Source0-md5:	f3b1706a991a34f9866b0b2c27c6d0e1
 Patch0:		%{name}-desktop.patch
 URL:		https://goodies.xfce.org/projects/applications/ristretto/
 BuildRequires:	autoconf >= 2.50
