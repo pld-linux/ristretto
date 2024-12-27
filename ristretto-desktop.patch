@@ -1,10 +1,11 @@
---- ristretto-0.11.0/org.xfce.ristretto.desktop.in~	2020-12-18 10:32:29.000000000 +0000
-+++ ristretto-0.11.0/org.xfce.ristretto.desktop.in	2021-06-11 11:47:14.189782667 +0000
-@@ -8,6 +8,6 @@
+--- ristretto-0.13.3/org.xfce.ristretto.desktop.in~	2024-12-25 15:26:34.000000000 +0000
++++ ristretto-0.13.3/org.xfce.ristretto.desktop.in	2024-12-27 00:55:32.013290599 +0000
+@@ -8,7 +8,7 @@
  Terminal=false
  Type=Application
  X-MultipleArgs=false
 -Categories=GTK;Graphics;Viewer;
 +Categories=X-XFCE;GTK;Graphics;Viewer;
+ Keywords=image;photo;picture;viewer;graphics;
  StartupNotify=true
- MimeType=image/png;image/gif;image/jpeg;image/bmp;image/x-pixmap;image/tiff;image/svg+xml;image/x-xpixmap;
+ MimeType=image/png;image/gif;image/jpeg;image/bmp;image/x-pixmap;image/tiff;image/svg+xml;image/x-xpixmap;image/webp;
